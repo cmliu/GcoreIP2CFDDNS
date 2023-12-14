@@ -264,7 +264,7 @@ do
         TGtext=$record_name'.'$zone_name' 更新成功: '${line%%,*}
         echo $TGtext
         break
-      elif [[ "$update" != "${update%success*}" ]] && [[ "$(echo $update | grep "\"code\":81058")" != "" ]]; then
+      elif [[ "$update" != "${update%success*}" ]] && [[ "$(echo $update | grep "\"code\":81057")" != "" ]]; then
         TGtext=$record_name'.'$zone_name' 维护成功: '${line%%,*}
         echo $TGtext
         break
