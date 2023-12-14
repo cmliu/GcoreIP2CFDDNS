@@ -1,5 +1,5 @@
 #!/bin/bash
-# $ ./speed.sh hk 443 xxxx.com xxxx@gmail.com xxxxxxxxxxxxxxx https://vipcs.cloudflarest.link
+# $ ./speed.sh gcore xxxx.com xxxx@gmail.com xxxxxxxxxxxxxxx
 export LANG=zh_CN.UTF-8
 auth_email="xxxx@gmail.com"    #你的CloudFlare注册账户邮箱 *必填
 auth_key="xxxxxxxxxxxxxxx"   #你的CloudFlare账户key,位置在域名概述页面点击右下角获取api key。*必填
@@ -18,26 +18,21 @@ telegramBotToken="6599852032:AAHhetLKhXfAIjeXgCHpish1DK_NHo3BCrk" #telegram BotT
 telegramBotAPI="api.telegram.ssrc.cf" #telegram 推送API,留空将启用官方API接口:api.telegram.org
 ###############################################################以下脚本内容，勿动#######################################################################
 speedurl="https://speed.cloudflare.com/__down?bytes=$((speedtestMB * 1000000))" #官方测速链接
-proxygithub="https://ghproxy.com/" #反代github加速地址，如果不需要可以将引号内容删除，如需修改请确保/结尾 例如"https://ghproxy.com/"
+proxygithub="https://github.ssrc.cf/" #反代github加速地址，如果不需要可以将引号内容删除，如需修改请确保/结尾 例如"https://ghproxy.com/"
 
 #带有地区参数，将赋值第1参数为地区
 if [ -n "$1" ]; then 
-    area_GEC="$1"
-fi
-
-#带有端口参数，将赋值第2参数为端口
-if [ -n "$2" ]; then
-    port="$2"
+    record_name="$1"
 fi
 
 #带有CloudFlare账户邮箱参数，将赋值第4参数
-if [ -n "$4" ]; then
-    auth_email="$4"
+if [ -n "$3" ]; then
+    auth_email="$3"
 fi
 
 #带有CloudFlare账户key参数，将赋值第5参数
-if [ -n "$5" ]; then
-    auth_key="$5"
+if [ -n "$4" ]; then
+    auth_key="$4"
 fi
 
 # 选择客户端 CPU 架构
@@ -166,7 +161,7 @@ upip(){
 
 # 检查ip.txt文件是否存在
 if [ -e "ip.txt" ]; then
-    # 获取ip-${port}.txt文件的最后编辑时间戳
+    # 获取ip.txt文件的最后编辑时间戳
     file_timestamp=$(stat -c %Y ip.txt)
 
     # 获取当前时间戳
@@ -191,14 +186,10 @@ else
     upip
 fi
 
-if [ ! -d "log" ]; then
-  mkdir log
-fi
-
 #带有域名参数，将赋值第3参数为地区
-if [ -n "$3" ]; then 
-    zone_name="$3"
-    echo "域名 $3"
+if [ -n "$2" ]; then 
+    zone_name="$2"
+    echo "域名 $2"
 fi
 
 #带有自定义测速地址参数，将赋值第6参数为自定义测速地址
@@ -252,10 +243,10 @@ done
 speedqueue=$((record_count + speedqueue_max)) #自定义测速队列，多测2条做冗余
 
 #./CloudflareST -tp 443 -url "https://cs.cmliussss.link" -f "ip/HK.txt" -dn 128 -tl 260 -p 0 -o "log/HK.csv"
-./CloudflareST -tp $port -url $speedurl -f $ip_txt -dn $speedqueue -tl 280 -tlr $lossmax -p 0 -sl $speedlower -o $result_csv
+./CloudflareST -tp $port -url $speedurl -f $ip_txt -dn $speedqueue -tl 280 -tlr $lossmax -p 0 -sl $speedlower -o $result_csv -dd
 
 TGtext0=""
-sed -n '2,20p' result.csv | while read line
+sed -n '2,20p' $result_csv | while read line
 do
     #echo $record_name$record_count'.'$zone_name
     #record_identifier=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?name=$record_name"'.'"$zone_name" -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json" | grep -Po '(?<="id":")[^"]*' | head -1 )
@@ -290,7 +281,7 @@ do
     record_count=$(($record_count-1))    #二级域名序号递减
     #echo $record_count
     if [ $record_count -eq 0 ]; then
-        TGmessage "ACFST_DDNS更新完成！%0A地区:$area_GEC0 	端口:$port $TGtext0"
+        TGmessage "ACFST_DDNS更新完成！%0A地区:$record_name 	端口:$port $TGtext0"
         break
     fi
 
