@@ -10,7 +10,7 @@
 
 ### 下载脚本：
 ``` bash
-wget -N -P GcoreIP2CFDDNS https://raw.githubusercontent.com/cmliu/GcoreIP2CFDDNS/main/speed.sh && cd GcoreIP2CFDDNS && chmod +x speed.sh 
+wget -N -P GcoreIP2CFDDNS https://mirror.ghproxy.com/https://raw.githubusercontent.com/cmliu/GcoreIP2CFDDNS/main/speed.sh && cd GcoreIP2CFDDNS && chmod +x speed.sh 
 ```
 ### 运行脚本：
 ``` bash
@@ -40,8 +40,8 @@ telegramBotToken="6599852032:AAHhetLKhXfAIjeXgCHpish1DK_NHo3BCrk"   # Telegram�
 telegramBotAPI="api.telegram.org"     # Telegram推送API，默认为官方API
 ```
 
-## 感谢
-[xiaodao2026](https://github.com/xiaodao2026/speed)
+# 感谢
+ [xiaodao2026](https://github.com/xiaodao2026/speed)、[MaxMind](https://www.maxmind.com/)、[P3TERX](https://github.com/P3TERX/GeoLite.mmdb)、[XIU2](https://github.com/XIU2/CloudflareSpeedTest)
 
 
 
