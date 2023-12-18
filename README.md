@@ -6,19 +6,17 @@
 
 修改脚本中的配置参数，包括CloudFlare账户邮箱、API密钥、域名等信息。
 
-并提前建立好需要解析域名例如：gcore.xxxx.com，如需要单域名多IP，需要自动更新多少个IP就建立对应数量的域名A记录。
-
 ### 下载脚本：
 ``` bash
 wget -N -P GcoreIP2CFDDNS https://mirror.ghproxy.com/https://raw.githubusercontent.com/cmliu/GcoreIP2CFDDNS/main/speed.sh && cd GcoreIP2CFDDNS && chmod +x speed.sh 
 ```
 ### 运行脚本：
 ``` bash
-./speed.sh 二级域名 主域名 [CloudFlare邮箱] [CloudFlare API密钥]
+./speed.sh 二级域名 更新IP数量 主域名 [CloudFlare邮箱] [CloudFlare API密钥]
 ```
-### 例如：
+### 例如：给gcore.xxxx.com更新4条IP
 ``` bash
-./speed.sh gcore xxxx.com xxxx@gmail.com xxxxxxxxxxxxxxx
+./speed.sh gcore 4 xxxx.com xxxx@gmail.com xxxxxxxxxxxxxxx
 ```
 
 ### 参数说明
