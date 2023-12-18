@@ -5,8 +5,9 @@ auth_email="xxxx@gmail.com"    #你的CloudFlare注册账户邮箱 *必填
 auth_key="xxxxxxxxxxxxxxx"   #你的CloudFlare账户key,位置在域名概述页面点击右下角获取api key。*必填
 zone_name="xxxx.com"     #你的主域名 *必填
 
-area_GEC="gcore"    #自动更新的二级域名前缀,必须取hk sg kr jp us等常用国家代码
-port=443 #自定义测速端口 不能为空!!!
+area_GEC="gcore"    #自动更新的二级域名前缀
+ips=4    #获取更新IP的指定数量，默认为4 
+port=443  #自定义测速端口 不能为空!!!
 
 speedtestMB=90 #测速文件大小 单位MB，文件过大会拖延测试时长，过小会无法测出准确速度
 speedlower=10  #自定义下载速度下限,单位为mb/s
@@ -245,42 +246,80 @@ speedqueue=$((record_count + speedqueue_max)) #自定义测速队列，多测2�
 #./CloudflareST -tp 443 -url "https://cs.cmliussss.link" -f "ip/HK.txt" -dn 128 -tl 260 -p 0 -o "log/HK.csv"
 ./CloudflareST -tp $port -url $speedurl -f $ip_txt -dn $speedqueue -tl 280 -tlr $lossmax -p 0 -sl $speedlower -o $result_csv -dd
 
+for record_id in "${record_identifiers[@]}"; do
+
+	# 执行 curl 命令并将结果保存到变量
+	result=$(curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/${zone_identifier}/dns_records/${record_id}" \
+		 -H "X-Auth-Email: ${auth_email}" \
+		 -H "X-Auth-Key: ${auth_key}" \
+		 -H "Content-Type: application/json")
+
+	# 提取 success 字段的值
+	success=$(echo "${result}" | jq -r '.success')
+
+	# 判断 success 的值并输出相应的提示
+	if [ "${success}" == "true" ]; then
+		echo "$record_name.$zone_name 删除成功"
+	else
+		echo "$record_name.$zone_name 删除失败"
+	fi
+    # 可以在这里添加适当的等待时间，以避免对 API 的过多请求
+    sleep 1
+done
+
+#exit 1
+
 TGtext0=""
 sed -n '2,20p' $result_csv | while read line
 do
-    #echo $record_name$record_count'.'$zone_name
-    #record_identifier=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?name=$record_name"'.'"$zone_name" -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json" | grep -Po '(?<="id":")[^"]*' | head -1 )
-	
+
     # 初始化尝试次数
     attempt=0
     
     # 更新DNS记录
     while [[ $attempt -lt 3 ]]
     do
-      update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/${record_identifiers[$record_count - 1]}" -H "X-Auth-Email: $auth_email" -H "X-Auth-Key: $auth_key" -H "Content-Type: application/json" --data "{\"type\":\"$record_type\",\"name\":\"$record_name.$zone_name\",\"content\":\"${line%%,*}\",\"ttl\":60,\"proxied\":false}")
-    
-      # 反馈更新情况
-      if [[ "$update" != "${update%success*}" ]] && [[ "$(echo $update | grep "\"success\":true")" != "" ]]; then
-        TGtext=$record_name'.'$zone_name' 更新成功: '${line%%,*}
-        echo $TGtext
-        break
-      elif [[ "$update" != "${update%success*}" ]] && [[ "$(echo $update | grep "\"code\":81057")" != "" ]]; then
-        TGtext=$record_name'.'$zone_name' 维护成功: '${line%%,*}
-        echo $TGtext
-        break
-      else
-        TGtext=$record_name'.'$zone_name' 更新失败: '${update}
-        echo $TGtext
-        attempt=$(( $attempt + 1 ))
-        echo "尝试次数: $attempt, 1分钟后将再次尝试更新..."
-        sleep 60
-      fi
+	
+		# 执行 curl 命令并将结果保存到变量
+		result=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${zone_identifier}/dns_records" \
+			 -H "X-Auth-Email: ${auth_email}" \
+			 -H "X-Auth-Key: ${auth_key}" \
+			 -H "Content-Type: application/json" \
+			 --data '{
+			   "type": "'"${record_type}"'",
+			   "name": "'"${record_name}"'.'"${zone_name}"'",
+			   "content": "'"${line%%,*}"'",
+			   "ttl": 60,
+			   "proxied": false
+			 }')
+
+		# 提取 success 字段的值
+		success=$(echo "${result}" | jq -r '.success')
+
+		# 判断 success 的值并输出相应的提示
+		if [ "${success}" == "true" ]; then
+		    TGtext=$record_name'.'$zone_name' 更新成功: '${line%%,*}
+			echo $TGtext
+			break
+			echo "创建成功"
+		else
+
+			# 输出 messages 内容
+			messages=$(echo "${result}" | jq -r '.messages | join(", ")')
+			#echo "错误信息: ${messages}"
+			
+			TGtext=$record_name'.'$zone_name' 更新失败: '${messages}
+			echo $TGtext
+			attempt=$(( $attempt + 1 ))
+			echo "尝试次数: $attempt, 1分钟后将再次尝试更新..."
+			sleep 60
+		fi
+
     done
     
     TGtext0="$TGtext0%0A$TGtext"
-    record_count=$(($record_count-1))    #二级域名序号递减
-    #echo $record_count
-    if [ $record_count -eq 0 ]; then
+    ips=$(($ips-1))    #二级域名序号递减
+    if [ $ips -eq 0 ]; then
         TGmessage "ACFST_DDNS更新完成！%0A地区:$record_name 	端口:$port $TGtext0"
         break
     fi
