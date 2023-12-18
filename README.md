@@ -12,7 +12,7 @@ wget -N -P GcoreIP2CFDDNS https://mirror.ghproxy.com/https://raw.githubuserconte
 ```
 ### 运行脚本：
 ``` bash
-./speed.sh 二级域名 更新IP数量 主域名 [CloudFlare邮箱] [CloudFlare API密钥]
+./speed.sh [二级域名] [更新IP数量] [主域名] [CloudFlare邮箱] [CloudFlare API密钥]
 ```
 ### 例如：给gcore.xxxx.com更新4条IP
 ``` bash
