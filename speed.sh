@@ -1,5 +1,5 @@
 #!/bin/bash
-# $ ./speed.sh gcore xxxx.com xxxx@gmail.com xxxxxxxxxxxxxxx
+# $ ./speed.sh gcore 4 xxxx.com xxxx@gmail.com xxxxxxxxxxxxxxx
 export LANG=zh_CN.UTF-8
 auth_email="xxxx@gmail.com"    #你的CloudFlare注册账户邮箱 *必填
 auth_key="xxxxxxxxxxxxxxx"   #你的CloudFlare账户key,位置在域名概述页面点击右下角获取api key。*必填
@@ -26,14 +26,19 @@ if [ -n "$1" ]; then
     record_name="$1"
 fi
 
+#带有更新IP的指定数量参数，将赋值第2参数为端口
+if [ -n "" ]; then
+    ips="$2"
+fi
+
 #带有CloudFlare账户邮箱参数，将赋值第4参数
-if [ -n "$3" ]; then
-    auth_email="$3"
+if [ -n "$4" ]; then
+    auth_email="$4"
 fi
 
 #带有CloudFlare账户key参数，将赋值第5参数
-if [ -n "$4" ]; then
-    auth_key="$4"
+if [ -n "$5" ]; then
+    auth_key="$5"
 fi
 
 # 选择客户端 CPU 架构
@@ -188,9 +193,9 @@ else
 fi
 
 #带有域名参数，将赋值第3参数为地区
-if [ -n "$2" ]; then 
-    zone_name="$2"
-    echo "域名 $2"
+if [ -n "$3" ]; then 
+    zone_name="$3"
+    echo "域名 $3"
 fi
 
 #带有自定义测速地址参数，将赋值第6参数为自定义测速地址
